@@ -87,7 +87,7 @@ class Decoder(nn.Module):
         
 # Conditional VAE
 class CVAE(pl.LightningModule):
-    def __init__(self, seq_len, feat_dim, conditional_dim, enc_out_dim, latent_dim, beta, learning_rate, min_std):
+    def __init__(self, seq_len, feat_dim, conditional_dim, enc_out_dim, latent_dim, beta, learning_rate, min_std, checkpoint_path):
         super().__init__()
 
         self.save_hyperparameters()
@@ -103,6 +103,10 @@ class CVAE(pl.LightningModule):
         self.fc_var = nn.Linear(enc_out_dim, latent_dim)
 
         self.learning_rate = learning_rate
+
+        self.checkpoint_path = checkpoint_path
+        """ if(self.checkpoint_path):
+            self.load_model() """
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
@@ -177,12 +181,13 @@ class CVAE(pl.LightningModule):
             kl = self.trainer.logged_metrics['kl']
             recon_loss = self.trainer.logged_metrics['recon_loss']
             print(f"\rEpoch {self.current_epoch + 1}: \tELBO: {elbo:.4f}, (KL: {kl:.4f}, Recon Loss: {recon_loss:.4f})")
+            self.save_model()
 
-    def save_model(self, checkpoint_path):
-        torch.save(self.state_dict(), checkpoint_path)
+    def save_model(self):
+        torch.save(self.state_dict(), self.checkpoint_path)
         
-    def load_model(self, checkpoint_path):
-        self.load_state_dict(torch.load(checkpoint_path))
+    def load_model(self):
+        self.load_state_dict(torch.load(self.checkpoint_path))
 
 
 # VAE 
