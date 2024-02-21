@@ -1,0 +1,10 @@
+.DS_Store
+bin
+include
+lib
+pyvenv.cfg
+share
+VAE
+wavenet
+*.csv
+!starting_point.csv
