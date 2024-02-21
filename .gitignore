@@ -10,3 +10,4 @@ wavenet
 __pycache__
 !starting_point.csv
 !data/linear_interpolated_part*
+!data/linear_interpolated_union.csv

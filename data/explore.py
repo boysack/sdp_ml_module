@@ -57,6 +57,16 @@ def filter_datetime_range():
     df[mask02].to_csv("data/linear_interpolated_part02.csv")
     df[mask03].to_csv("data/linear_interpolated_part03.csv")
 
+def fuse_parts():
+    df01 = pd.read_csv("data/linear_interpolated_part01.csv", index_col=0)
+    df02 = pd.read_csv("data/linear_interpolated_part02.csv", index_col=0)
+    df03 = pd.read_csv("data/linear_interpolated_part03.csv", index_col=0)
+
+    union_df = pd.concat([df01, df02, df03])
+
+    union_df.to_csv("data/linear_interpolated_union.csv")
+
 if __name__=="__main__":
-    fill_and_interpolate()
-    filter_datetime_range()
+    #fill_and_interpolate()
+    #filter_datetime_range()
+    fuse_parts()
