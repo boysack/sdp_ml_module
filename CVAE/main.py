@@ -56,7 +56,17 @@ def train(args):
  """
 
 def generate_synthetic_data():
-    pass
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    model = CVAE(seq_len=1, feat_dim=13, conditional_dim=2, enc_out_dim=5, latent_dim=3, beta=1.0, learning_rate=0.005, min_std=0.025, checkpoint_path=args.checkpoint_path).to(device)
+    model.load_model()
+    model.eval()
+
+    num_samples = 100
+    noise = torch.randn(num_samples, 13)
+    generated_data = model(noise).detach().numpy()
+
+    print(generated_data)
 
 def main(args):
     if args.train and args.gen_data:
