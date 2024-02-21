@@ -21,7 +21,7 @@ def train(args):
 
     num_epochs = 5
 
-    model = CVAE(seq_len=1, feat_dim=15, conditional_dim=2, enc_out_dim=5, latent_dim=3, beta=1.0, learning_rate=0.005, min_std=0.025, checkpoint_path=args.checkpoint_path).to(device)
+    model = CVAE(seq_len=1, feat_dim=13, conditional_dim=2, enc_out_dim=5, latent_dim=3, beta=1.0, learning_rate=0.005, min_std=0.025, checkpoint_path=args.checkpoint_path).to(device)
     trainer = pl.Trainer(max_epochs=num_epochs)
 
     dataset = ArolDataset(args.dataset_path+"_part01.csv")

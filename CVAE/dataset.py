@@ -5,7 +5,7 @@ import torch
 class ArolDataset(Dataset):
     def __init__(self, data_path):
         df = pd.read_csv(data_path, index_col=0).drop(columns=['sensor_time'])
-
+    
         #self.data = df.drop(columns=["ProdSpeed", "LockDegree"])
         self.data = df
         self.conditional = df[["ProdSpeed", "LockDegree"]]
