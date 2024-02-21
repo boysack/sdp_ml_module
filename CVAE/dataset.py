@@ -7,8 +7,8 @@ class ArolDataset(Dataset):
         df = pd.read_csv(data_path).drop(columns=['sensor_time'])
 
         #self.data = df.drop(columns=["ProdSpeed", "LockDegree"])
-        self.data = df.head(42)
-        self.conditional = df[["ProdSpeed", "LockDegree"]].head(42)
+        self.data = df
+        self.conditional = df[["ProdSpeed", "LockDegree"]]
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
