@@ -12,7 +12,7 @@ def parse_arguments():
     parser.add_argument('--num_epochs', type=int, default=25, help='Epochs number')
     parser.add_argument('--batch_size', type=int, default=8, help='Batch size')
     parser.add_argument('--dataset_path', default="data/linear_interpolated_all.csv", type=str, help='Dataset path', metavar="")
-    parser.add_argument('--checkpoint_path', type=str, default=f"/checkpoints/checkpoint-{int(time.time())}", help='Checkpoint path', metavar="")
+    parser.add_argument('--checkpoint_path', type=str, default=f"checkpoints/checkpoint-{int(time.time())}", help='Checkpoint path', metavar="")
     parser.add_argument('--gen_data',  action='store_true', help='Begin generating synthetic data')
     return parser
 

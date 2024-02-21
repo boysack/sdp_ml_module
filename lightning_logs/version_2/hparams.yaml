@@ -1,0 +1,9 @@
+beta: 1.0
+checkpoint_path: checkpoints/checkpoint-1708536209
+conditional_dim: 2
+enc_out_dim: 5
+feat_dim: 15
+latent_dim: 3
+learning_rate: 0.005
+min_std: 0.025
+seq_len: 1

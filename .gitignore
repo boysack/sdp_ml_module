@@ -7,4 +7,5 @@ share
 VAE
 wavenet
 *.csv
+__pycache__
 !starting_point.csv
