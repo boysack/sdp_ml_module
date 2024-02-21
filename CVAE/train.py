@@ -22,7 +22,7 @@ def train(args):
     model = CVAE(seq_len=1, feat_dim=15, conditional_dim=2, enc_out_dim=5, latent_dim=3, beta=1.0, learning_rate=0.005, min_std=0.025).to(device)
     dataset = ArolDataset(args.dataset_path)
     dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False)
-    trainer = pl.Trainer()
+    trainer = pl.Trainer(max_epochs=args.num_epochs)
     trainer.fit(model, dataloader)
     
 """ optimizer = model.configure_optimizers()
