@@ -10,6 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import pytorch_lightning as pl
+import os
 
 # Encoder
 class Encoder(nn.Module):
@@ -89,6 +90,11 @@ class Decoder(nn.Module):
 class CVAE(pl.LightningModule):
     def __init__(self, seq_len, feat_dim, conditional_dim, enc_out_dim, latent_dim, beta, learning_rate, min_std, checkpoint_path):
         super().__init__()
+        self.seq_len = seq_len
+        self.feat_dim = feat_dim
+        self.conditional_dim = conditional_dim
+        self.enc_out_dim = enc_out_dim
+        self.latent_dim = latent_dim
 
         self.save_hyperparameters()
 
@@ -105,8 +111,8 @@ class CVAE(pl.LightningModule):
         self.learning_rate = learning_rate
 
         self.checkpoint_path = checkpoint_path
-        """ if(self.checkpoint_path):
-            self.load_model() """
+        if(os.path.exists(self.checkpoint_path)):
+            self.load_model()
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
@@ -153,7 +159,7 @@ class CVAE(pl.LightningModule):
         y_reshaped = y_reshaped.mean(dim=0)
         y_reshaped = y_reshaped.view(-1, y_reshaped.size(0))
         ####
-
+    
         conditioned_z = torch.cat((z, y_reshaped), dim=1)  # Concatenate z and y
         x_hat_mean, x_hat_log_scale = self.decoder(conditioned_z)
 
@@ -175,6 +181,29 @@ class CVAE(pl.LightningModule):
 
         return elbo
 
+    def forward(self, batch):
+        x, y = batch
+
+        # Encode x to get the mu and variance parameters
+        x_encoded = self.encoder(x)
+        mu, log_var = self.fc_mu(x_encoded), self.fc_var(x_encoded)
+
+        # Sample z from q
+        std = torch.exp(log_var / 2)
+        q = torch.distributions.Normal(mu, std)
+        z = q.rsample().flatten(1)
+
+        # Decode the conditioned z
+        y_reshaped = y.view(y.size(0), -1).float()
+
+        #### me: calculate the mean as fixed values
+        y_reshaped = y_reshaped.mean(dim=0)
+        y_reshaped = y_reshaped.view(-1, y_reshaped.size(0))
+        ####
+
+        conditioned_z = torch.cat((z, y_reshaped), dim=1)  # Concatenate z and y
+        x_hat_mean, x_hat_log_scale = self.decoder(conditioned_z)
+
     def on_train_epoch_end(self):
         if self.current_epoch % 5 == 0:
             elbo = self.trainer.logged_metrics['elbo']
@@ -187,7 +216,8 @@ class CVAE(pl.LightningModule):
         torch.save(self.state_dict(), self.checkpoint_path)
         
     def load_model(self):
-        self.load_state_dict(torch.load(self.checkpoint_path))
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.load_state_dict(torch.load(self.checkpoint_path, map_location=torch.device("cpu")))
 
 
 # VAE 

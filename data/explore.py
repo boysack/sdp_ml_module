@@ -66,7 +66,30 @@ def fuse_parts():
 
     union_df.to_csv("data/linear_interpolated_union.csv")
 
+def save_mean_std():
+    df01 = pd.read_csv("data/linear_interpolated_part01.csv", index_col=0).drop(columns=["sensor_time"])
+    df02 = pd.read_csv("data/linear_interpolated_part02.csv", index_col=0).drop(columns=["sensor_time"])
+    df03 = pd.read_csv("data/linear_interpolated_part03.csv", index_col=0).drop(columns=["sensor_time"])
+
+    df01_means = df01.mean()
+    df02_means = df02.mean()
+    df03_means = df03.mean()
+
+    df01_stds = df01.std()
+    df02_stds = df02.std()
+    df03_stds = df03.std()
+
+    df_means = pd.concat([df01_means, df02_means, df03_means], axis=1)
+    df_means = df_means.mean(axis=1)
+
+    df_stds = pd.concat([df01_stds, df02_stds, df03_stds], axis=1)
+    df_stds = df_stds.mean(axis=1)
+
+    df_means.to_csv("data/metadata/df_original_means.csv")
+    df_stds.to_csv("data/metadata/df_original_stds.csv")
+
 if __name__=="__main__":
     #fill_and_interpolate()
     #filter_datetime_range()
-    fuse_parts()
+    #fuse_parts()
+    save_mean_std()
