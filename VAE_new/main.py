@@ -100,10 +100,17 @@ def gen(args):
 
             break """
         
-        start = dataset.__getitem__(0)
-        for i in range(50):
+        start = dataset.__getitem__(0)[0]
+        df = pd.DataFrame(columns=range(start.shape[0]))
+        start = start.reshape((1, start.shape[0]))
+        
+        for i in range(1, 1000):
             z, mu, std, y_hat, y_hat_mean, y_hat_log_scale = model(start)
-            
+            start = y_hat
+            df = pd.concat([df, pd.DataFrame(start, index=[i])])
+        #print(df)
+        df.plot(subplots=True, figsize=(50,5))
+        plt.show()
 
         """ for batch_idx, (x, _) in enumerate(tqdm(test_loader)):
             x = x.view(batch_size, x_dim)

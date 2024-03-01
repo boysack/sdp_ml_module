@@ -7,7 +7,6 @@ from tqdm import tqdm
 class ArolDataset(Dataset):
     def __init__(self, data_path):
         df = pd.read_csv(data_path, index_col=0)
-        #df = pd.read_csv(data_path, index_col=0)
         if df.isna().any().any():
             raise Exception("Data contains NaN values")
 

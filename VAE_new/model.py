@@ -140,32 +140,9 @@ class VAE(nn.Module):
         return x_hat, mean, log_var
     
     def loss_function(self, y, y_hat, mean, log_var):
-        self.i += 1
-        if self.i == 10000:
-            print(y_hat)
-            raise Exception()
         recon_loss = F.mse_loss(y_hat, y, reduction='mean')
         KLD = -0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp())
-        """ print("y_hat")
-        print(y_hat)
-        print("y")
-        print(y)
-        print("recon_loss")
-        print(recon_loss)
-
-        print("mean")
-        print(mean)
-        print("log_var")
-        print(log_var)
-        print("KLD")
-        print(KLD)
-        if self.i == 5:
-            raise Exception()
-        self.i += 1 """
-        """ self.i += 1
-        print(self.i) """
-        """ print("recon_loss: ", recon_loss)
-        print("KLD: ", KLD) """
+        
         return recon_loss + KLD, recon_loss, KLD
     
     def save_model(self, epoch, optimizer, loss):
