@@ -25,6 +25,12 @@ class ArolDataset(Dataset):
         self.data = sample_df.drop(columns=['sensor_time'])
         self.n_data = n_sample_df.drop(columns=['sensor_time'])
 
+        # change the last two columns to be ProdSpee and LockDegree
+        columns_to_move = ['ProdSpeed', 'LockDegree']
+        remaining_columns = [col for col in self.data.columns if col not in columns_to_move]
+        self.data = df[remaining_columns + columns_to_move]
+        self.n_data = df[remaining_columns + columns_to_move]
+
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
     def __len__(self):

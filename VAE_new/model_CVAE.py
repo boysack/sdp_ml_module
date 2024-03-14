@@ -89,7 +89,7 @@ class Decoder(nn.Module):
     
 # Conditional VAE
 class CVAE(pl.LightningModule, nn.Module):
-    def __init__(self, seq_len, feat_dim, enc_out_dim, latent_dim, beta, learning_rate, min_std):
+    def __init__(self, seq_len, feat_dim, enc_out_dim, latent_dim, cond_dim, beta, learning_rate, min_std):
         super().__init__()
 
         self.save_hyperparameters()
@@ -97,8 +97,9 @@ class CVAE(pl.LightningModule, nn.Module):
         # encoder, decoder
         self.beta = beta
         self.min_std = min_std
-        self.encoder = Encoder(seq_len, feat_dim, enc_out_dim)
-        self.decoder = Decoder(seq_len, feat_dim, feat_dim + latent_dim, enc_out_dim)
+        self.cond_dim = cond_dim
+        self.encoder = Encoder(seq_len, feat_dim-cond_dim, enc_out_dim)
+        self.decoder = Decoder(seq_len, feat_dim, cond_dim + latent_dim, enc_out_dim)
 
         # distribution parameters
         self.fc_mu = nn.Linear(enc_out_dim, latent_dim)
@@ -133,7 +134,9 @@ class CVAE(pl.LightningModule, nn.Module):
         kl = kl.sum(dim=1)
         return kl
 
-    def forward(self, x):
+    def forward(self, x_all):
+        x = x_all[:,:-self.cond_dim]
+        cond = x[:,-self.cond_dim:]
         # Encode x to get the mu and variance parameters
         x_encoded = self.encoder(x)
         mu, log_var = self.fc_mu(x_encoded), self.fc_var(x_encoded)
@@ -143,7 +146,7 @@ class CVAE(pl.LightningModule, nn.Module):
         z = q.rsample().flatten(1)
         # Decode the conditioned z
         #y_reshaped = y.view(y.size(0), -1).float()
-        conditioned_z = torch.cat((z, x), dim=1)
+        conditioned_z = torch.cat((z, cond), dim=1)
         y_hat_mean, y_hat_log_scale = self.decoder(conditioned_z)
 
         y_hat_std = torch.exp(y_hat_log_scale / 2)

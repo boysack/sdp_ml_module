@@ -88,8 +88,18 @@ def save_mean_std():
     df_means.to_csv("data/metadata/df_original_means.csv")
     df_stds.to_csv("data/metadata/df_original_stds.csv")
 
+def save_mean_std_2():
+    df = pd.read_csv("../other_models/data/dataframe_interpolated_augmented.csv", index_col=0).drop(columns=["sensor_time", "Unnamed: 0"])
+    columns_to_move = ['ProdSpeed', 'LockDegree']
+    remaining_columns = [col for col in df.columns if col not in columns_to_move]
+    df = df[remaining_columns + columns_to_move]
+
+    std = df.std()
+    std.to_csv("../other_models/data/metadata/dataframe_interpolated_augmented_std.csv", header=False)
+
 if __name__=="__main__":
     #fill_and_interpolate()
     #filter_datetime_range()
     #fuse_parts()
-    save_mean_std()
+    #save_mean_std()
+    save_mean_std_2()

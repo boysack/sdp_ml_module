@@ -29,7 +29,7 @@ def train(args):
     dataset = ArolDataset(args.dataset_path)
     dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False)
     model = VAE(input_dim=13, hidden_dim=10, latent_dim=8, checkpoint_path=args.checkpoint_path, lr=args.lr).to(device)
-    model = CVAE(seq_len=1, feat_dim=13, enc_out_dim=10, latent_dim=8, beta=0.5, learning_rate=args.lr, min_std=0.025).to(device)
+    model = CVAE(seq_len=1, feat_dim=13, enc_out_dim=10, latent_dim=8, cond_dim=2, beta=0.5, learning_rate=args.lr, min_std=0.025).to(device)
 
     #optimizer = model.get_optimizer()
     optimizer = model.configure_optimizers()
@@ -79,7 +79,7 @@ def gen(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     #model = VAE(input_dim=13, hidden_dim=10, latent_dim=8, checkpoint_path=args.checkpoint_path, lr=args.lr, load=True).to(device)
-    model = CVAE(seq_len=1, feat_dim=13, enc_out_dim=10, latent_dim=8, beta=0.5, learning_rate=args.lr, min_std=0.025).to(device)
+    model = CVAE(seq_len=1, feat_dim=13, enc_out_dim=10, latent_dim=8, cond_dim=2, beta=0.5, learning_rate=args.lr, min_std=0.025).to(device)
     model.load_model(args.checkpoint_path)
     model.eval()
 
@@ -100,16 +100,47 @@ def gen(args):
 
             break """
         
+        cond = torch.tensor([10, 27380], dtype=torch.float32)
+        cond = cond.reshape((1, cond.shape[0]))
+
         start = dataset.__getitem__(0)[0]
-        df = pd.DataFrame(columns=range(start.shape[0]))
+        start = start[:-2]
         start = start.reshape((1, start.shape[0]))
+        start = torch.cat([start, cond], dim=1)
         
+        df_01 = pd.DataFrame(columns=range(start.shape[0]))
+
         for i in range(1, 1000):
             z, mu, std, y_hat, y_hat_mean, y_hat_log_scale = model(start)
             start = y_hat
-            df = pd.concat([df, pd.DataFrame(start, index=[i])])
-        #print(df)
-        df.plot(subplots=True, figsize=(50,5))
+            start = start[:,:-2]
+            start = torch.cat([start, cond], dim=1)
+
+            df_01 = pd.concat([df_01, pd.DataFrame(y_hat, index=[i])])
+
+        df_01.plot(subplots=True, figsize=(50,5))
+
+
+
+        cond = torch.tensor([10, 1000], dtype=torch.float32)
+        cond = cond.reshape((1, cond.shape[0]))
+
+        start = dataset.__getitem__(0)[0]
+        start = start[:-2]
+        start = start.reshape((1, start.shape[0]))
+        start = torch.cat([start, cond], dim=1)
+        
+        df_02 = pd.DataFrame(columns=range(start.shape[0]))
+
+        for i in range(1, 1000):
+            z, mu, std, y_hat, y_hat_mean, y_hat_log_scale = model(start)
+            start = y_hat
+            start = start[:,:-2]
+            start = torch.cat([start, cond], dim=1)
+
+            df_02 = pd.concat([df_02, pd.DataFrame(y_hat, index=[i])])
+
+        df_02.plot(subplots=True, figsize=(50,5))
         plt.show()
 
         """ for batch_idx, (x, _) in enumerate(tqdm(test_loader)):
